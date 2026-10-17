@@ -31,5 +31,4 @@ public class Address extends BaseEntity{
     @JoinColumn(name = "user_id")
     private User user;
 
-
 }

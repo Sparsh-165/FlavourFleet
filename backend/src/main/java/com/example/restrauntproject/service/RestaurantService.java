@@ -156,7 +156,7 @@ public class RestaurantService {
     }
 
 
-    private RestaurantResponseDTO convertRestaurantToRestaurantResponseDTO(Restaurant restaurant) {
+    public RestaurantResponseDTO convertRestaurantToRestaurantResponseDTO(Restaurant restaurant) {
         RestaurantResponseDTO restaurantResponseDTO = new RestaurantResponseDTO();
 
 

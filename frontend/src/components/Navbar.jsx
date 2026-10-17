@@ -1,7 +1,7 @@
 import { Link, useLocation } from 'react-router-dom';
-import { UtensilsCrossed, Home, PlusCircle } from 'lucide-react';
+import { UtensilsCrossed, Home, PlusCircle, LogOut, User } from 'lucide-react';
 
-function Navbar() {
+function Navbar({ user, onLogout }) {
   const location = useLocation();
 
   const isActive = (path) => location.pathname === path;
@@ -20,7 +20,7 @@ function Navbar() {
             </span>
           </Link>
 
-          {/* Nav Links */}
+          {/* Nav Links + User */}
           <div className="flex items-center gap-1">
             <Link
               to="/"
@@ -44,6 +44,25 @@ function Navbar() {
               <PlusCircle className="w-4 h-4" />
               <span className="hidden sm:inline">Add Restaurant</span>
             </Link>
+
+            {/* User Info & Logout */}
+            {user && (
+              <div className="flex items-center gap-2 ml-2 pl-2 border-l border-stone-200">
+                <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-brand-50 text-brand-700 text-sm">
+                  <User className="w-3.5 h-3.5" />
+                  <span className="font-medium max-w-[120px] truncate">{user.name}</span>
+                </div>
+                <button
+                  onClick={onLogout}
+                  id="logout-btn"
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium text-stone-500 hover:bg-red-50 hover:text-red-600 transition-all duration-200"
+                  title="Sign out"
+                >
+                  <LogOut className="w-4 h-4" />
+                  <span className="hidden sm:inline">Logout</span>
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>

@@ -7,6 +7,11 @@ const API = axios.create({
   },
 });
 
+// User APIs
+export const loginUser = (data) => API.post('/user/login', data);
+
+export const registerUser = (data) => API.post('/user', data);
+
 // Restaurant APIs
 export const addRestaurant = (data) => API.post('/restaurant', data);
 
@@ -24,3 +29,4 @@ export const updateMenuItem = (id, data) => API.put(`/menuItem/${id}`, data);
 export const deleteMenuItem = (id) => API.delete(`/menuItem/${id}`);
 
 export default API;
+
