@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, type ChangeEvent, type FormEvent } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import {
@@ -15,8 +15,24 @@ import {
   Pencil,
 } from 'lucide-react';
 import { updateMenuItem, getMenuItem } from '../api/api';
+import type { MenuItem, MenuItemType } from '../types';
 
-const emptyVariant = {
+interface MenuItemFormState {
+  name: string;
+  description: string;
+  menuItemType: MenuItemType;
+  label: string;
+}
+
+interface VariantFormState {
+  dishVariantName: string;
+  price: string | number;
+  available: boolean;
+  inventoryManaged: boolean;
+  currentAvailableInventoryCount: string | number;
+}
+
+const emptyVariant: VariantFormState = {
   dishVariantName: '',
   price: '',
   available: true,
@@ -25,57 +41,21 @@ const emptyVariant = {
 };
 
 function EditMenuItem() {
-  const { restaurantId, menuItemId } = useParams();
+  const { restaurantId, menuItemId } = useParams<{ restaurantId: string; menuItemId: string }>();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
 
-  const [form, setForm] = useState({
+  const [form, setForm] = useState<MenuItemFormState>({
     name: '',
     description: '',
     menuItemType: 'VEG',
     label: '',
   });
 
-  const [variants, setVariants] = useState([{ ...emptyVariant }]);
+  const [variants, setVariants] = useState<VariantFormState[]>([{ ...emptyVariant }]);
 
-  // Pre-fill form: try sessionStorage first, then fall back to API
-  useEffect(() => {
-    const savedItem = sessionStorage.getItem('editMenuItem');
-    if (savedItem) {
-      try {
-        const item = JSON.parse(savedItem);
-        populateForm(item);
-        sessionStorage.removeItem('editMenuItem');
-        setFetching(false);
-        return;
-      } catch {
-        // ignore parse errors, fall through to API
-      }
-    }
-
-    // Fallback: fetch from API
-    const fetchFromAPI = async () => {
-      try {
-        const res = await getMenuItem(menuItemId);
-        if (res.data) {
-          populateForm(res.data);
-        } else {
-          toast.error('Menu item not found');
-          navigate(`/restaurant/${restaurantId}`);
-        }
-      } catch (err) {
-        toast.error('Failed to load menu item details');
-        navigate(`/restaurant/${restaurantId}`);
-      } finally {
-        setFetching(false);
-      }
-    };
-
-    fetchFromAPI();
-  }, [menuItemId, restaurantId, navigate]);
-
-  const populateForm = (item) => {
+  const populateForm = (item: MenuItem) => {
     setForm({
       name: item.name || '',
       description: item.description || '',
@@ -95,11 +75,52 @@ function EditMenuItem() {
     }
   };
 
-  const handleFormChange = (e) => {
+  // Pre-fill form: try sessionStorage first, then fall back to API
+  useEffect(() => {
+    const savedItem = sessionStorage.getItem('editMenuItem');
+    if (savedItem) {
+      try {
+        const item: MenuItem = JSON.parse(savedItem);
+        populateForm(item);
+        sessionStorage.removeItem('editMenuItem');
+        setFetching(false);
+        return;
+      } catch {
+        // ignore parse errors, fall through to API
+      }
+    }
+
+    // Fallback: fetch from API
+    const fetchFromAPI = async () => {
+      if (!menuItemId) return;
+      try {
+        const res = await getMenuItem(menuItemId);
+        if (res.data) {
+          populateForm(res.data);
+        } else {
+          toast.error('Menu item not found');
+          navigate(`/restaurant/${restaurantId}`);
+        }
+      } catch (err) {
+        toast.error('Failed to load menu item details');
+        navigate(`/restaurant/${restaurantId}`);
+      } finally {
+        setFetching(false);
+      }
+    };
+
+    fetchFromAPI();
+  }, [menuItemId, restaurantId, navigate]);
+
+  const handleFormChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleVariantChange = (index, field, value) => {
+  const handleVariantChange = (
+    index: number,
+    field: keyof VariantFormState,
+    value: string | boolean | number
+  ) => {
     const updated = [...variants];
     updated[index] = { ...updated[index], [field]: value };
     setVariants(updated);
@@ -109,7 +130,7 @@ function EditMenuItem() {
     setVariants([...variants, { ...emptyVariant }]);
   };
 
-  const removeVariant = (index) => {
+  const removeVariant = (index: number) => {
     if (variants.length === 1) {
       toast.error('At least one variant is required');
       return;
@@ -117,9 +138,10 @@ function EditMenuItem() {
     setVariants(variants.filter((_, i) => i !== index));
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
 
+    if (!restaurantId || !menuItemId) return;
     if (!form.name.trim()) return toast.error('Dish name is required');
     if (!form.description.trim()) return toast.error('Description is required');
     if (form.description.trim().length > 1000) return toast.error('Description cannot exceed 1000 characters');
@@ -153,7 +175,7 @@ function EditMenuItem() {
         icon: <CheckCircle2 className="w-5 h-5 text-green-500" />,
       });
       navigate(`/restaurant/${restaurantId}`);
-    } catch (err) {
+    } catch (err: any) {
       toast.error(err?.response?.data || 'Failed to update menu item');
     } finally {
       setLoading(false);

@@ -1,10 +1,10 @@
-import { useState } from 'react';
+import { useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   UtensilsCrossed,
   Mail,
   Phone,
-  User,
+  User as UserIcon,
   MapPin,
   Globe,
   Hash,
@@ -15,20 +15,45 @@ import {
   LogIn,
   UserPlus,
   Sparkles,
+  Code2,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { loginUser, registerUser } from '../api/api';
+import type { User } from '../types';
 
-function Login({ onLogin }) {
+interface LoginProps {
+  onLogin: (userData: User) => void;
+}
+
+interface LoginFormState {
+  email: string;
+  phoneNumber: string;
+}
+
+interface RegisterFormState {
+  name: string;
+  email: string;
+  phoneNumber: string;
+  streetLine1: string;
+  streetLine2: string;
+  country: string;
+  pinCode: string;
+  latitude: string;
+  longitude: string;
+  label: string;
+  defaultAddress: boolean;
+}
+
+function Login({ onLogin }: LoginProps) {
   const [isRegister, setIsRegister] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   // Login form
-  const [loginForm, setLoginForm] = useState({ email: '', phoneNumber: '' });
+  const [loginForm, setLoginForm] = useState<LoginFormState>({ email: '', phoneNumber: '' });
 
   // Register form with sensible defaults
-  const [registerForm, setRegisterForm] = useState({
+  const [registerForm, setRegisterForm] = useState<RegisterFormState>({
     name: '',
     email: '',
     phoneNumber: '',
@@ -51,6 +76,15 @@ function Login({ onLogin }) {
     toast.info('Demo credentials filled!');
   };
 
+  // Quick helper to fill dev login credentials
+  const fillDevLogin = () => {
+    setLoginForm({
+      email: 'dev@flavourfleet.com',
+      phoneNumber: '1234567890',
+    });
+    toast.info('Dev account credentials filled!');
+  };
+
   // Quick helper to fill sample registration details
   const fillDemoRegister = () => {
     const randomSuffix = Math.floor(1000 + Math.random() * 9000);
@@ -70,7 +104,7 @@ function Login({ onLogin }) {
     toast.info('Sample user details filled!');
   };
 
-  const handleLogin = async (e) => {
+  const handleLogin = async (e: FormEvent) => {
     e.preventDefault();
     const email = loginForm.email.trim();
     const phoneNumber = loginForm.phoneNumber.trim();
@@ -90,7 +124,7 @@ function Login({ onLogin }) {
       } else {
         toast.error('Invalid credentials. Please verify your details.');
       }
-    } catch (err) {
+    } catch (err: any) {
       if (err.response?.status === 401) {
         toast.error('No account found with this email and phone number. Please register first.');
       } else {
@@ -101,7 +135,7 @@ function Login({ onLogin }) {
     }
   };
 
-  const handleRegister = async (e) => {
+  const handleRegister = async (e: FormEvent) => {
     e.preventDefault();
 
     // Basic validation
@@ -131,7 +165,7 @@ function Login({ onLogin }) {
       } else {
         toast.error('Registration failed. Please check your details.');
       }
-    } catch (err) {
+    } catch (err: any) {
       toast.error(err.response?.data?.message || err.response?.data?.msg || 'Registration failed. Please check your details.');
     } finally {
       setLoading(false);
@@ -225,15 +259,26 @@ function Login({ onLogin }) {
                   </div>
                 </div>
 
-                {/* Demo Credentials Quick Fill Button */}
-                <button
-                  type="button"
-                  onClick={fillDemoLogin}
-                  className="w-full py-2 px-3 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 rounded-xl text-xs font-medium flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
-                >
-                  <Sparkles className="w-3.5 h-3.5 text-amber-600" />
-                  Auto-fill Demo Credentials (alex@flavourfleet.com)
-                </button>
+                {/* Quick Auto-Fill Buttons */}
+                <div className="space-y-2">
+                  <button
+                    type="button"
+                    onClick={fillDemoLogin}
+                    className="w-full py-2 px-3 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 rounded-xl text-xs font-medium flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                  >
+                    <Sparkles className="w-3.5 h-3.5 text-amber-600" />
+                    Auto-fill Demo (alex@flavourfleet.com / 9876543210)
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={fillDevLogin}
+                    className="w-full py-2 px-3 bg-violet-50 hover:bg-violet-100 text-violet-800 border border-violet-200 rounded-xl text-xs font-medium flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                  >
+                    <Code2 className="w-3.5 h-3.5 text-violet-600" />
+                    Auto-fill Dev (dev@flavourfleet.com / 1234567890)
+                  </button>
+                </div>
 
                 {/* Login Button */}
                 <button
@@ -283,7 +328,7 @@ function Login({ onLogin }) {
                 <div>
                   <label className="block text-sm font-medium text-stone-700 mb-1.5">Full Name</label>
                   <div className="relative">
-                    <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400" />
+                    <UserIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400" />
                     <input
                       id="register-name"
                       type="text"

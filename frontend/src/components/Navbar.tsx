@@ -1,10 +1,16 @@
 import { Link, useLocation } from 'react-router-dom';
-import { UtensilsCrossed, Home, PlusCircle, LogOut, User } from 'lucide-react';
+import { UtensilsCrossed, Home, PlusCircle, LogOut, User as UserIcon } from 'lucide-react';
+import type { User } from '../types';
 
-function Navbar({ user, onLogout }) {
+interface NavbarProps {
+  user: User | null;
+  onLogout: () => void;
+}
+
+function Navbar({ user, onLogout }: NavbarProps) {
   const location = useLocation();
 
-  const isActive = (path) => location.pathname === path;
+  const isActive = (path: string) => location.pathname === path;
 
   return (
     <nav className="sticky top-0 z-50 glass-card shadow-sm">
@@ -49,7 +55,7 @@ function Navbar({ user, onLogout }) {
             {user && (
               <div className="flex items-center gap-2 ml-2 pl-2 border-l border-stone-200">
                 <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-brand-50 text-brand-700 text-sm">
-                  <User className="w-3.5 h-3.5" />
+                  <UserIcon className="w-3.5 h-3.5" />
                   <span className="font-medium max-w-[120px] truncate">{user.name}</span>
                 </div>
                 <button

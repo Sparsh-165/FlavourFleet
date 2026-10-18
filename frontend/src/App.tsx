@@ -8,14 +8,15 @@ import RestaurantView from './pages/RestaurantView';
 import AddMenuItem from './pages/AddMenuItem';
 import EditMenuItem from './pages/EditMenuItem';
 import Login from './pages/Login';
+import type { User } from './types';
 
 function App() {
-  const [user, setUser] = useState(() => {
+  const [user, setUser] = useState<User | null>(() => {
     const saved = sessionStorage.getItem('flavourfleet_user');
     return saved ? JSON.parse(saved) : null;
   });
 
-  const handleLogin = (userData) => {
+  const handleLogin = (userData: User) => {
     setUser(userData);
     sessionStorage.setItem('flavourfleet_user', JSON.stringify(userData));
   };

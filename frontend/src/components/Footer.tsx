@@ -1,4 +1,4 @@
-import { UtensilsCrossed, Github, Heart } from 'lucide-react';
+import { UtensilsCrossed, Heart } from 'lucide-react';
 
 function Footer() {
   return (

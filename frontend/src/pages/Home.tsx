@@ -1,13 +1,14 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, type FormEvent } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Search, ArrowRight, Utensils, MapPin, Clock, Star, Phone, Globe, ChefHat, Loader2, Store } from 'lucide-react';
+import { Search, ArrowRight, Utensils, MapPin, Clock, Globe, ChefHat, Loader2, Store, Phone } from 'lucide-react';
 import { toast } from 'sonner';
 import { getAllRestaurants } from '../api/api';
+import type { RestaurantSummary } from '../types';
 
 function Home() {
   const [searchId, setSearchId] = useState('');
   const navigate = useNavigate();
-  const [restaurants, setRestaurants] = useState([]);
+  const [restaurants, setRestaurants] = useState<RestaurantSummary[]>([]);
   const [loadingRestaurants, setLoadingRestaurants] = useState(true);
 
   useEffect(() => {
@@ -25,10 +26,10 @@ function Home() {
     fetchRestaurants();
   }, []);
 
-  const handleSearch = (e) => {
+  const handleSearch = (e: FormEvent) => {
     e.preventDefault();
     const id = searchId.trim();
-    if (!id || isNaN(id) || Number(id) <= 0) {
+    if (!id || isNaN(Number(id)) || Number(id) <= 0) {
       toast.error('Please enter a valid restaurant ID');
       return;
     }

@@ -14,14 +14,16 @@ import {
 } from 'lucide-react';
 import { getRestaurant } from '../api/api';
 import MenuItemCard from '../components/MenuItemCard';
+import type { Restaurant } from '../types';
 
 function RestaurantView() {
-  const { id } = useParams();
-  const [restaurant, setRestaurant] = useState(null);
+  const { id } = useParams<{ id: string }>();
+  const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<'not_found' | 'server_error' | null>(null);
 
   const fetchRestaurant = useCallback(async () => {
+    if (!id) return;
     setLoading(true);
     setError(null);
     try {
@@ -31,7 +33,7 @@ function RestaurantView() {
       } else {
         setError('not_found');
       }
-    } catch (err) {
+    } catch (err: any) {
       if (err?.response?.status === 404 || err?.response?.data === null) {
         setError('not_found');
       } else {
@@ -47,13 +49,13 @@ function RestaurantView() {
     fetchRestaurant();
   }, [fetchRestaurant]);
 
-  const handleMenuItemDeleted = (deletedItemId) => {
+  const handleMenuItemDeleted = (deletedItemId: number) => {
     // Optimistically remove the item from local state, then re-fetch for consistency
     setRestaurant((prev) => {
       if (!prev) return prev;
       return {
         ...prev,
-        menuItems: prev.menuItems.filter((item) => item.id !== deletedItemId),
+        menuItems: (prev.menuItems || []).filter((item) => item.id !== deletedItemId),
       };
     });
   };
@@ -69,7 +71,7 @@ function RestaurantView() {
   }
 
   // Not found
-  if (error === 'not_found') {
+  if (error === 'not_found' || !restaurant) {
     return (
       <div className="fade-in flex flex-col items-center justify-center min-h-[60vh] gap-4 px-4">
         <div className="w-20 h-20 bg-stone-100 rounded-full flex items-center justify-center">

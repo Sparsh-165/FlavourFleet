@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, type ChangeEvent, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import {
@@ -14,25 +14,38 @@ import {
 } from 'lucide-react';
 import { addRestaurant } from '../api/api';
 
+interface AddRestaurantFormState {
+  name: string;
+  phoneNumber: string;
+  streetLine1: string;
+  streetLine2: string;
+  country: string;
+  pinCode: string;
+  latitude: string;
+  longitude: string;
+}
+
+const initialForm: AddRestaurantFormState = {
+  name: '',
+  phoneNumber: '',
+  streetLine1: '',
+  streetLine2: '',
+  country: '',
+  pinCode: '',
+  latitude: '',
+  longitude: '',
+};
+
 function AddRestaurant() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-  const [form, setForm] = useState({
-    name: '',
-    phoneNumber: '',
-    streetLine1: '',
-    streetLine2: '',
-    country: '',
-    pinCode: '',
-    latitude: '',
-    longitude: '',
-  });
+  const [form, setForm] = useState<AddRestaurantFormState>(initialForm);
 
-  const handleChange = (e) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
 
     // Client-side validation
@@ -57,17 +70,8 @@ function AddRestaurant() {
       toast.success('Restaurant added successfully!', {
         icon: <CheckCircle2 className="w-5 h-5 text-green-500" />,
       });
-      setForm({
-        name: '',
-        phoneNumber: '',
-        streetLine1: '',
-        streetLine2: '',
-        country: '',
-        pinCode: '',
-        latitude: '',
-        longitude: '',
-      });
-    } catch (err) {
+      setForm(initialForm);
+    } catch (err: any) {
       toast.error(err?.response?.data || 'Failed to add restaurant. Please try again.');
     } finally {
       setLoading(false);

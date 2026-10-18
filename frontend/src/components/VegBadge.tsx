@@ -1,4 +1,10 @@
-function VegBadge({ type }) {
+import type { MenuItemType } from '../types';
+
+interface VegBadgeProps {
+  type: MenuItemType;
+}
+
+function VegBadge({ type }: VegBadgeProps) {
   const isVeg = type === 'VEG';
 
   return (

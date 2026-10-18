@@ -17,11 +17,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import org.springframework.transaction.annotation.Transactional;
+
 import java.util.ArrayList;
 import java.util.List;
 
 
 @Service
+@Transactional
 public class UserService {
 
     @Autowired
@@ -34,10 +37,14 @@ public class UserService {
     private RestaurantService restaurantService;
 
 
+    @Transactional(readOnly = true)
     public ResponseEntity<UserResponseDTO> loginUser(String email, String phoneNumber) {
         if (StringUtils.isBlank(email) || StringUtils.isBlank(phoneNumber)) {
             return ResponseEntity.badRequest().body(null);
         }
+
+        email = email.trim();
+        phoneNumber = phoneNumber.trim();
 
         User user = userRepository.findByEmailAndPhoneNumber(email, phoneNumber);
 

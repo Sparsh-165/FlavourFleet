@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, type ChangeEvent, type FormEvent } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import {
@@ -9,14 +9,29 @@ import {
   Loader2,
   CheckCircle2,
   Package,
-  DollarSign,
   Tag,
   FileText,
   Layers,
 } from 'lucide-react';
 import { addMenuItem } from '../api/api';
+import type { MenuItemType } from '../types';
 
-const emptyVariant = {
+interface MenuItemFormState {
+  name: string;
+  description: string;
+  menuItemType: MenuItemType;
+  label: string;
+}
+
+interface VariantFormState {
+  dishVariantName: string;
+  price: string;
+  available: boolean;
+  inventoryManaged: boolean;
+  currentAvailableInventoryCount: string | number;
+}
+
+const emptyVariant: VariantFormState = {
   dishVariantName: '',
   price: '',
   available: true,
@@ -25,24 +40,28 @@ const emptyVariant = {
 };
 
 function AddMenuItem() {
-  const { restaurantId } = useParams();
+  const { restaurantId } = useParams<{ restaurantId: string }>();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
 
-  const [form, setForm] = useState({
+  const [form, setForm] = useState<MenuItemFormState>({
     name: '',
     description: '',
     menuItemType: 'VEG',
     label: '',
   });
 
-  const [variants, setVariants] = useState([{ ...emptyVariant }]);
+  const [variants, setVariants] = useState<VariantFormState[]>([{ ...emptyVariant }]);
 
-  const handleFormChange = (e) => {
+  const handleFormChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleVariantChange = (index, field, value) => {
+  const handleVariantChange = (
+    index: number,
+    field: keyof VariantFormState,
+    value: string | boolean | number
+  ) => {
     const updated = [...variants];
     updated[index] = { ...updated[index], [field]: value };
     setVariants(updated);
@@ -52,7 +71,7 @@ function AddMenuItem() {
     setVariants([...variants, { ...emptyVariant }]);
   };
 
-  const removeVariant = (index) => {
+  const removeVariant = (index: number) => {
     if (variants.length === 1) {
       toast.error('At least one variant is required');
       return;
@@ -60,7 +79,7 @@ function AddMenuItem() {
     setVariants(variants.filter((_, i) => i !== index));
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
 
     if (!form.name.trim()) return toast.error('Dish name is required');
@@ -96,7 +115,7 @@ function AddMenuItem() {
         icon: <CheckCircle2 className="w-5 h-5 text-green-500" />,
       });
       navigate(`/restaurant/${restaurantId}`);
-    } catch (err) {
+    } catch (err: any) {
       toast.error(err?.response?.data || 'Failed to add menu item');
     } finally {
       setLoading(false);

@@ -4,8 +4,16 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { deleteMenuItem } from '../api/api';
 import VegBadge from './VegBadge';
+import type { MenuItem } from '../types';
 
-function MenuItemCard({ item, index, restaurantId, onDelete }) {
+interface MenuItemCardProps {
+  item: MenuItem;
+  index: number;
+  restaurantId?: string | number;
+  onDelete?: (id: number) => void;
+}
+
+function MenuItemCard({ item, index, restaurantId, onDelete }: MenuItemCardProps) {
   const navigate = useNavigate();
   const [showConfirm, setShowConfirm] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -17,13 +25,14 @@ function MenuItemCard({ item, index, restaurantId, onDelete }) {
   };
 
   const handleDelete = async () => {
+    if (!item.id) return;
     setDeleting(true);
     try {
       await deleteMenuItem(item.id);
       toast.success(`"${item.name}" deleted successfully`);
       setShowConfirm(false);
       if (onDelete) onDelete(item.id);
-    } catch (err) {
+    } catch (err: any) {
       toast.error(err?.response?.data || 'Failed to delete menu item');
     } finally {
       setDeleting(false);

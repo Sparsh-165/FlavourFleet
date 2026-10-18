@@ -23,6 +23,6 @@ public class User extends BaseEntity{
     private String phoneNumber;
     private boolean verified;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<Address> addressList;
 }
